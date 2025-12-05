@@ -1,9 +1,11 @@
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Text.Json;
+using System.Collections.Generic;
+using System.Linq;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -151,8 +153,6 @@ public class ExamResultEntity
     public int TotalMarks { get; set; }
     public double Percentage { get; set; }
     public bool Passed { get; set; }
-
-    // Local system time (IST on your machine)
     public DateTime SubmittedAtUtc { get; set; }
 }
 
@@ -279,7 +279,7 @@ public static class ExamEvaluator
             TotalMarks = total,
             Percentage = Math.Round(percentage, 2),
             Passed = passed,
-            SubmittedAtUtc = DateTime.Now   // ✅ local system time
+            SubmittedAtUtc = DateTime.UtcNow
         };
 
         db.Results.Add(entity);
@@ -289,7 +289,7 @@ public static class ExamEvaluator
     }
 }
 
-// Seeder (unchanged)
+// Seeder
 public static class ExamSeeder
 {
     public static void SeedDefaultExam(ExamDbContext db)
@@ -308,7 +308,290 @@ public static class ExamSeeder
         var questions = new List<QuestionEntity>();
         int id = 1;
 
-        // ... (poora same questions block jo tumne bheja tha, yahi rehne do)
+        // =========================
+        // C Language – 5 questions
+        // =========================
+        questions.Add(new QuestionEntity
+        {
+            Id = id++,
+            Section = "C Language",
+            Text = "What is the size of int on a typical 32-bit system?",
+            OptionsJson = JsonSerializer.Serialize(new[] { "1 byte", "2 bytes", "4 bytes", "8 bytes" }),
+            CorrectIndex = 2,
+            Marks = 1
+        });
+
+        questions.Add(new QuestionEntity
+        {
+            Id = id++,
+            Section = "C Language",
+            Text = "Which of the following is a valid declaration of main in C?",
+            OptionsJson = JsonSerializer.Serialize(new[]
+            {
+                "int main()", "void main()", "main()", "integer main()"
+            }),
+            CorrectIndex = 0,
+            Marks = 1
+        });
+
+        questions.Add(new QuestionEntity
+        {
+            Id = id++,
+            Section = "C Language",
+            Text = "What is the output of: printf(\"%d\", 5/2);",
+            OptionsJson = JsonSerializer.Serialize(new[] { "2.5", "2", "3", "Error" }),
+            CorrectIndex = 1,
+            Marks = 1
+        });
+
+        questions.Add(new QuestionEntity
+        {
+            Id = id++,
+            Section = "C Language",
+            Text = "Which keyword is used to define a constant in C?",
+            OptionsJson = JsonSerializer.Serialize(new[] { "#define", "const", "static", "final" }),
+            CorrectIndex = 1,
+            Marks = 1
+        });
+
+        questions.Add(new QuestionEntity
+        {
+            Id = id++,
+            Section = "C Language",
+            Text = "Which of these is a valid storage class in C?",
+            OptionsJson = JsonSerializer.Serialize(new[] { "auto", "value", "managed", "private" }),
+            CorrectIndex = 0,
+            Marks = 1
+        });
+
+        // =========================
+        // Data Structures – 5 questions
+        // =========================
+        questions.Add(new QuestionEntity
+        {
+            Id = id++,
+            Section = "Data Structures",
+            Text = "Which data structure works on FIFO principle?",
+            OptionsJson = JsonSerializer.Serialize(new[] { "Stack", "Queue", "Tree", "Graph" }),
+            CorrectIndex = 1,
+            Marks = 1
+        });
+
+        questions.Add(new QuestionEntity
+        {
+            Id = id++,
+            Section = "Data Structures",
+            Text = "Which traversal of a BST gives sorted order of elements?",
+            OptionsJson = JsonSerializer.Serialize(new[] { "Preorder", "Inorder", "Postorder", "Level order" }),
+            CorrectIndex = 1,
+            Marks = 1
+        });
+
+        questions.Add(new QuestionEntity
+        {
+            Id = id++,
+            Section = "Data Structures",
+            Text = "Time complexity of binary search on a sorted array is:",
+            OptionsJson = JsonSerializer.Serialize(new[] { "O(n)", "O(log n)", "O(n log n)", "O(1)" }),
+            CorrectIndex = 1,
+            Marks = 1
+        });
+
+        questions.Add(new QuestionEntity
+        {
+            Id = id++,
+            Section = "Data Structures",
+            Text = "Which data structure is most suitable for implementing recursion?",
+            OptionsJson = JsonSerializer.Serialize(new[] { "Queue", "Array", "Stack", "Linked List" }),
+            CorrectIndex = 2,
+            Marks = 1
+        });
+
+        questions.Add(new QuestionEntity
+        {
+            Id = id++,
+            Section = "Data Structures",
+            Text = "Which of the following is a self-balancing binary search tree?",
+            OptionsJson = JsonSerializer.Serialize(new[] { "Binary Heap", "AVL Tree", "Graph", "Trie" }),
+            CorrectIndex = 1,
+            Marks = 1
+        });
+
+        // =========================
+        // Aptitude – 10 questions
+        // =========================
+        void AddApt(string text, string[] opts, int corr)
+        {
+            questions.Add(new QuestionEntity
+            {
+                Id = id++,
+                Section = "Aptitude",
+                Text = text,
+                OptionsJson = JsonSerializer.Serialize(opts),
+                CorrectIndex = corr,
+                Marks = 1
+            });
+        }
+
+        AddApt("Find the missing number: 3, 8, 15, 24, 35, __",
+            new[] { "46", "48", "49", "50" }, 0);
+
+        AddApt("A train 180m long crosses a pole in 12s. What is its approximate speed (km/h)?",
+            new[] { "35", "45", "54", "60" }, 2);
+
+        AddApt("The ratio of two numbers is 3:5. If their sum is 80, what is the larger number?",
+            new[] { "30", "50", "48", "20" }, 1);
+
+        AddApt("Simplify: 48 ÷ 2 (9 + 3)",
+            new[] { "2", "24", "288", "12" }, 2);
+
+        AddApt("If A is 25% more than B, then B is how much less than A?",
+            new[] { "15%", "20%", "25%", "30%" }, 1);
+
+        AddApt("Find the odd one out: 36, 49, 25, 22",
+            new[] { "36", "49", "25", "22" }, 3);
+
+        AddApt("2 men or 3 women can do a work in 10 days. In how many days will 6 women finish it?",
+            new[] { "5 days", "10 days", "7 days", "6 days" }, 0);
+
+        AddApt("What is 15% of 240?",
+            new[] { "24", "30", "36", "40" }, 2);
+
+        AddApt("Series: 2, 4, 12, 48, __",
+            new[] { "96", "132", "192", "240" }, 2);
+
+        AddApt("Cost Price is ₹500, Profit is 20%. Selling Price?",
+            new[] { "550", "600", "520", "700" }, 1);
+
+        // =========================
+        // SQL – 5 questions
+        // =========================
+        void AddSql(string text, string[] opts, int corr)
+        {
+            questions.Add(new QuestionEntity
+            {
+                Id = id++,
+                Section = "SQL",
+                Text = text,
+                OptionsJson = JsonSerializer.Serialize(opts),
+                CorrectIndex = corr,
+                Marks = 1
+            });
+        }
+
+        AddSql("PRIMARY KEY ensures:",
+            new[] { "Duplicates", "Nulls allowed", "Unique & Not Null", "None" }, 2);
+
+        AddSql("Which query gives 2nd highest salary?",
+            new[]
+            {
+                "SELECT TOP 2 salary FROM Employee ORDER BY salary DESC",
+                "SELECT MAX(salary) FROM Employee",
+                "SELECT MAX(salary) FROM Employee WHERE salary < (SELECT MAX(salary) FROM Employee)",
+                "SELECT salary FROM Employee"
+            }, 2);
+
+        AddSql("Index mainly improves:",
+            new[] { "Insert performance", "Delete performance", "Read/query performance", "Disk space" }, 2);
+
+        AddSql("JOIN is used to:",
+            new[] { "Add data", "Combine rows from multiple tables", "Delete data", "None" }, 1);
+
+        AddSql("Which prevents SQL Injection?",
+            new[] { "String concatenation", "Dynamic SQL", "Parameterized queries", "None" }, 2);
+
+        // =========================
+        // HTML/CSS/JS/React – 15 questions
+        // =========================
+        void AddTech(string section, string text, string[] opts, int corr)
+        {
+            questions.Add(new QuestionEntity
+            {
+                Id = id++,
+                Section = section,
+                Text = text,
+                OptionsJson = JsonSerializer.Serialize(opts),
+                CorrectIndex = corr,
+                Marks = 1
+            });
+        }
+
+        // HTML/CSS (4)
+        AddTech("HTML/CSS", "Which tag is used to create a hyperlink in HTML?",
+            new[] { "<a>", "<link>", "<href>", "<url>" }, 0);
+
+        AddTech("HTML/CSS", "Which CSS property changes the text color?",
+            new[] { "font-style", "text-color", "color", "text-style" }, 2);
+
+        AddTech("HTML/CSS", "Which meta tag helps for responsive design?",
+            new[]
+            {
+                "<meta charset=\"utf-8\">",
+                "<meta viewport=\"device\">",
+                "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">",
+                "<meta responsive>"
+            }, 2);
+
+        AddTech("HTML/CSS", "Which HTML tag is used to create an ordered list?",
+            new[] { "<ul>", "<ol>", "<li>", "<list>" }, 1);
+
+        // JavaScript (5)
+        AddTech("JavaScript", "Which method is used to parse a JSON string?",
+            new[] { "JSON.decode()", "JSON.parse()", "JSON.toObject()", "JSON.stringify()" }, 1);
+
+        AddTech("JavaScript", "Which keyword declares a block-scoped variable?",
+            new[] { "var", "let", "static", "global" }, 1);
+
+        AddTech("JavaScript", "How do you write an arrow function?",
+            new[]
+            {
+                "function() => {}",
+                "() => {}",
+                "=> function() {}",
+                "func => {}"
+            }, 1);
+
+        AddTech("JavaScript", "Which comparison operator checks both value and type?",
+            new[] { "==", "!=", "===", ">=" }, 2);
+
+        AddTech("JavaScript", "Which object is used for console logging?",
+            new[] { "window", "console", "document", "log" }, 1);
+
+        // React (6)
+        AddTech("React", "Which hook is used for state in a functional component?",
+            new[] { "useEffect", "useState", "useRef", "useMemo" }, 1);
+
+        AddTech("React", "useEffect(() => {}, []) runs:",
+            new[] { "On every render", "Only on first render", "On unmount only", "Never" }, 1);
+
+        AddTech("React", "Keys in list rendering should be:",
+            new[] { "Random", "Index always", "Unique & stable", "Optional" }, 2);
+
+        AddTech("React", "What is JSX?",
+            new[]
+            {
+                "A CSS preprocessor",
+                "A JavaScript XML-like syntax used in React",
+                "A database query language",
+                "A routing library"
+            }, 1);
+
+        AddTech("React", "Which command creates a new React app (CRA)?",
+            new[]
+            {
+                "npx create-react-app my-app",
+                "npm new react-app",
+                "react-cli new",
+                "dotnet new react"
+            }, 0);
+
+        AddTech("React", "Which hook is best for side effects (API calls, subscriptions)?",
+            new[] { "useState", "useEffect", "useMemo", "useCallback" }, 1);
+
+        // Attach questions and save
+        exam.Questions = questions;
+        db.Exams.Add(exam);
+        db.SaveChanges();
     }
 }
 
